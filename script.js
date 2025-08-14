@@ -1,46 +1,174 @@
+let playerScore = 0;
+let computerScore = 0;
+let roundWinner = "";
+
+function playRound(playerSelection, computerSelection) {
+  if (playerSelection === computerSelection) {
+    roundWinner = "tie";
+  }
+  if (
+    (playerSelection == "ROCK" && computerSelection == "SCISSORS") ||
+    (playerSelection == "SCISSORS" && computerSelection == "PAPER") ||
+    (playerSelection == "PAPER" && computerSelection == "ROCK")
+  ) {
+    playerScore++;
+    roundWinner = "player";
+  }
+
+  if (
+    (computerSelection == "ROCK" && playerSelection == "SCISSORS") ||
+    (computerSelection == "SCISSORS" && playerSelection == "PAPER") ||
+    (computerSelection == "PAPER" && playerSelection == "ROCK")
+  ) {
+    computerScore++;
+    roundWinner = "computer";
+  }
+  updateScoreMessage(roundWinner, playerSelection, computerSelection);
+}
+
 function computerPlay() {
   let computerRandom = Math.floor(Math.random() * 3);
   switch (computerRandom) {
     case 0:
-      return "Rock";
+      return "ROCK";
 
     case 1:
-      return "Paper";
+      return "SCISSORS";
     case 2:
-      return "Scissors";
+      return "PAPER";
   }
 }
 
-function playRound(playerSelection, computerSelection) {
-  if (
-    (playerSelection == "Rock" && computerSelction == "Scissors") ||
-    (playerSelection == "Scissors" && computerSelction == "Paper") ||
-    (playerSelection == "Paper" && computerSelction == "Rock")
-  ) {
-    return "you win !";
-  } else if (
-    (computerSelction == "Rock" && playerSelection == "Scissors") ||
-    (computerSelction == "Scissors" && playerSelection == "Paper") ||
-    (computerSelction == "Rock" && playerSelection == "Scissors")
-  ) {
-    return "you lose !";
-  } else {
-    return "equals ";
+function isGameOver() {
+  return playerScore === 5 || computerScore === 5;
+}
+
+//------------------------------ UI-----------------------------------
+//scoreboard
+const scoreInfo = document.getElementById("scoreInfo");
+const scoreMessage = document.getElementById("scoreMessage");
+
+const playerSign = document.getElementById("playerSign");
+const playerScorePara = document.getElementById("playerScore");
+
+const computerSign = document.getElementById("computerSign");
+const computerScorePara = document.getElementById("computerScore");
+
+// buttons
+const rockBtn = document.getElementById("rockBtn");
+const paperBtn = document.getElementById("paperBtn");
+const scissorsBtn = document.getElementById("scissorsBtn");
+
+// modal
+const endgameModal = document.getElementById("endgameModal");
+const endgameMsg = document.getElementById("endgameMsg");
+const restartBtn = document.getElementById("restartBtn");
+const overlay = document.getElementById("overlay");
+
+// track clicks events
+rockBtn.addEventListener("click", () => handleClick("ROCK"));
+paperBtn.addEventListener("click", () => handleClick("PAPER"));
+scissorsBtn.addEventListener("click", () => handleClick("SCISSORS"));
+
+restartBtn.addEventListener("click", restartGame);
+overlay.addEventListener("click", closeEndgameModal);
+function handleClick(playerSelection) {
+  if (isGameOver()) {
+    openEndgameModal();
+    return;
+  }
+  const computerSelection = computerPlay();
+  playRound(playerSelection, computerSelection);
+  updateChoices(playerSelection, computerSelection);
+  updateScore();
+  if (isGameOver()) {
+    openEndgameModal();
+    setFinalMessage();
   }
 }
-alert("welcometo rock paper scissors game !");
-const playerSelection = prompt("choose : Rock , Paper or Scissors ");
-const computerSelction = computerPlay();
 
-console.log(computerSelction);
-console.log(playRound(playerSelection, computerSelction));
-
-let score;
-let attempts;
-function game() {
-  for (let i = 0; i < 5; i++) {
-    attempts++;
-    console.log(playRound(playerSelection, computerSelction));
-    alert("sorry you reached the limit !");
+function updateChoices(playerSelection, computerSelection) {
+  switch (playerSelection) {
+    case "ROCK":
+      playerSign.textContent = "✊";
+      break;
+    case "PAPER":
+      playerSign.textContent = "✋";
+      break;
+    case "SCISSORS":
+      playerSign.textContent = "✌";
+      break;
   }
+  switch (computerSelection) {
+    case "ROCK":
+      computerSign.textContent = "✊";
+      break;
+    case "PAPER":
+      computerSign.textContent = "✋";
+      break;
+    case "SCISSORS":
+      computerSign.textContent = "✌";
+      break;
+  }
+}
+
+function updateScore() {
+  if (roundWinner === "tie") {
+    scoreInfo.textContent = "it's tie ";
+  } else if (roundWinner == "player") {
+    scoreInfo.textContent = "you won!";
+  } else if (roundWinner === "computer") {
+    scoreInfo.textContent = "you lost!";
+  }
+  playerScorePara.textContent = `Player :${playerScore}`;
+  computerScorePara.textContent = `Computer :${computerScore}`;
+}
+
+function updateScoreMessage(winner, playerSelection, computerSelection) {
+  if (winner == "player") {
+    scoreMessage.textContent = `${capitalizeFirstLetter(
+      playerSelection
+    )} beats ${computerSelection.toLowerCase()}`;
+    return;
+  }
+  if (winner == "computer") {
+    scoreMessage.textContent = `${capitalizeFirstLetter(
+      playerSelection
+    )} beats ${computerSelection.toLowerCase()}`;
+    return;
+  }
+  scoreMessage.textContent = `${capitalizeFirstLetter(
+    playerSelection
+  )}ties with ${computerSelection.toLowerCase()}}`;
+}
+
+function capitalizeFirstLetter(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+}
+
+function openEndgameModal() {
+  endgameModal.classList.add("active");
+  overlay.classList.add("active");
+}
+function closeEndgameModal() {
+  endgameModal.classList.remove("active");
+  overlay.classList.remove("active");
+}
+
+function setFinalMessage() {
+  return playerScore > computerScore
+    ? (endgameMsg.textContent = "You won!")
+    : (endgameMsg.textContent = "You Lost ...");
+}
+function restartGame() {
+  playerScore = 0;
+  computerScore = 0;
+  scoreInfo.textContent = "Choose your weapon";
+  scoreMessage.textContent = "First to score 5 points wins the game";
+  playerScorePara.textContent = "Player: 0";
+  computerScorePara.textContent = "Computer: 0";
+  playerSign.textContent = "❔";
+  computerSign.textContent = "❔";
+  endgameModal.classList.remove("active");
+  overlay.classList.remove("active");
 }
